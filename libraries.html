@@ -1,0 +1,92 @@
+<!-- 
+libraries.html
+
+Alex Viznytsya
+Fall 2018
+ -->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<style type="text/css">
+		.star_icon_full {
+			text-shadow: 0 0 2px rgba(0,0,0,0.7);
+			color: #FDE16D;
+		}
+		.star_icon {
+			cursor:pointer;
+		}
+		.list_template {
+			display: none;
+		}
+	</style>
+</head>
+<body>
+	<li class="list_template">
+		<span class="mdc-list-item__text">
+  			<span class="mdc-list-item__primary-text">First-line text</span>
+  			<span class="mdc-list-item__secondary-text">Second-line text</span>
+		</span>
+		<span class="mdc-list-item__meta material-icons star_icon" aria-hidden="true">star_border</span>
+	</li>
+
+	<ul class="mdc-list mdc-list--two-line"></ul>
+
+	<script type="text/javascript">
+
+	    var db = new Dexie("favorite_libraries");
+	    db.version(1).stores({
+	        library: 'name, address, city, state, zip, hours_of_operation, phone, latitude, longitude'
+	    });
+
+		var listContainer = $(".mdc-list--two-line");
+		var libraryData = 0;
+		$.get("https://data.cityofchicago.org/resource/psqp-6rmg.json", function(data) {
+			libraryData = data;
+  			$.each(data, function(k, v) {
+  				const listItem = $(".list_template").clone();
+  				listItem.removeClass("list_template");
+  				listItem.addClass("mdc-list-item");
+  				listItem.find(".mdc-list-item__primary-text").text(v.name_);
+  				listItem.find(".mdc-list-item__secondary-text").text(v.address);
+				db.library.where("name").equals(v.name_).first().then(function(data) {
+					if (data) {
+						listItem.find(".mdc-list-item__meta").addClass("star_icon_full");
+  						listItem.find(".mdc-list-item__meta").text("star");
+					}
+				});
+				
+  				listContainer.append(listItem);
+  			});
+		}).always(function() {
+    		$(".mdc-list-item__meta").on("click", function(e) {
+				const listItem = $(this);
+				if (listItem.hasClass("star_icon_full")) {
+					listItem.removeClass("star_icon_full");
+					listItem.text("star_border");
+					db.library.where("name").equals(listItem.parent().find(".mdc-list-item__primary-text").text()).delete();
+				} else {
+					listItem.addClass("star_icon_full");
+					listItem.text("star");
+
+					$.each(libraryData, function(k, v) {
+						if (v.name_ == listItem.parent().find(".mdc-list-item__primary-text").text()) {
+							db.library.put({name: v.name_, 
+											address: v.address, 
+											city: v.city, 
+											state: v.state, 
+											zip: v.zip, 
+											hours_of_operation: v.hours_of_operation, 
+											phone: v.phone, 
+											latitude: v.location.coordinates[1], 
+											longitude: v.location.coordinates[0]
+											});
+							return;
+						}
+					});
+				}
+			});
+ 		});
+	</script>
+</body>
+</html>

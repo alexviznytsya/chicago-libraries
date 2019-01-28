@@ -1,0 +1,54 @@
+<!-- 
+map.html
+
+Alex Viznytsya
+Fall 2018
+ -->
+
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<div id="map" style="width: 100vw; height: 100vh;"></div>	
+<script>
+
+	function showLibraryOnMap(geoData) {
+
+        var myPosition = {lat: geoData.coords.latitude, lng: geoData.coords.longitude};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          	zoom: 12,
+          	center: myPosition
+        });
+
+        var marker = new google.maps.Marker({
+          position: myPosition,
+          map: map,
+          title: 'This is me!',
+          icon: './images/position.jpg'
+        });
+
+		db.library.each(function(data) {
+			var marker = new google.maps.Marker({
+          		position: {lat: data.latitude,lng: data.longitude},
+          		map: map,
+          		icon: './images/library.png'
+        	});
+		});
+	};
+ 
+    db.library.count().then(function(data) {
+		if (data == 0) {
+			$("#content").html('<div style="position: absolute; top: 50%; left: 20%; right: 20%; border: 3px solid #6200ee; padding: 10px; text-align: center;">You don not have any favorites libraries to display them on map. Please select some libraries on Libraries page.</div>');
+		} else {
+			if (navigator.geolocation) {
+        		navigator.geolocation.getCurrentPosition(showLibraryOnMap);
+    		} else {
+        		$("#content").text("Geolocation is not supported by this browser.");
+    		}	
+		}
+    });
+    
+</script>
+</body>
+</html>
