@@ -9,3 +9,5 @@ This application show the list of all Chicago Public Libraries. User can select 
 ![Screenshot 2](screenshots/chicago_libraries_2.jpg "Screenshot 2")
 
 ![Screenshot 3](screenshots/chicago_libraries_3.jpg "Screenshot 3")
+
+![Screenshot 4](screenshots/chicago_libraries_4.jpg "Screenshot 4")
